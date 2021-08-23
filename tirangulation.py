@@ -2,8 +2,8 @@ import visualize
 import numpy as np
 import math
 
-CNT = 15
-MAXRANGE = 100
+CNT = 10
+MAXRANGE = 50
 
 Point = np.dtype([('x', 'i4'), ('y', 'i4'), ('id', 'i4')])
 CandidateState = np.dtype(
@@ -15,7 +15,7 @@ pointSet = np.zeros(0, dtype=Point)
 
 def init(p):
     p = np.empty(0, dtype=Point)
-    fo = open("input.in", "r")
+    fo = open("input2.in", "r")
 
     for line in fo.readlines():
         words = line.split()
@@ -45,7 +45,7 @@ def find_base_LR(lb, rb):
         v1 = np.array([Rmin['x']-Lmin['x'], Rmin['y']-Lmin['y']])
         v2 = np.array([R_points[i]['x']-Lmin['x'], R_points[i]['y']-Lmin['y']])
         angle = calAngle(v1, v2)
-        if(angle < 0):
+        if(angle < 0):  # 假如是顺时针旋转
             Rmin = R_points[i]
         if(R_points[i]['y'] > Rmin['y'] and R_points[i]['y'] > Lmin['y']):
             break
@@ -54,13 +54,12 @@ def find_base_LR(lb, rb):
         v1 = np.array([Lmin['x']-Rmin['x'], Lmin['y']-Rmin['y']])
         v2 = np.array([L_points[i]['x']-Rmin['x'], L_points[i]['y']-Rmin['y']])
         angle = calAngle(v1, v2)
-        if(angle > 0):
+        if(angle > 0):  # 假如是逆时针旋转
             Lmin = L_points[i]
         if(L_points[i]['y'] > Rmin['y'] and L_points[i]['y'] > Lmin['y']):
             break
 
     return [Lmin['id'], Rmin['id']]
-    pass
 
 
 def dis(vector1, vector2):
@@ -138,8 +137,10 @@ def find_candidate_id(lb, rb, LR_left_id, LR_right_id, side) -> int:
             elif side == 2:
                 LRvector = np.array(
                     [LR_left['x']-LR_right['x'], LR_left['y']-LR_right['y']])
+
             angle = calAngle(LRvector, candVector)  # 计算角度
             if (side == 1 and angle > 0 and angle < 180) or (side == 2 and angle < 0):
+                # 要求左侧候选点为逆时针角度，右侧反之
                 candArray = np.append(
                     candArray, np.array((cx, cy, abs(angle), point_id), dtype=CandidateState))
             print(" {} is a possible candidate".format(point_id))
@@ -235,8 +236,8 @@ def merge(lb, rb, side):
 
 
 if __name__ == '__main__':
-    #pointSet = init(pointSet)
-    pointSet = visualize.init(cnt=CNT, maxRange=MAXRANGE)
+    pointSet = init(pointSet)
+    #pointSet = visualize.init(cnt=CNT, maxRange=MAXRANGE)
     print(pointSet)
     visualize.draw_point(pointSet)
     merge(0, CNT-1, side=0)

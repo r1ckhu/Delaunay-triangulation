@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-
-from numpy.core.fromnumeric import repeat
 Point = np.dtype([('x', 'i4'), ('y', 'i4'), ('id', 'i4')])
 fig = plt.figure()
 ax = fig.add_subplot(111)
