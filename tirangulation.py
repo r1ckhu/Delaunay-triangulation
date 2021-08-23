@@ -1,3 +1,4 @@
+from matplotlib.pyplot import connect
 import visualize
 import numpy as np
 import math
@@ -12,7 +13,7 @@ pointSet = np.zeros(0, dtype=Point)
 def init(p):
     p = np.append(p, np.array(
         (0, 0), dtype=Point))
-    fo = open("input.in", "r")
+    fo = open("input2.in", "r")
     for line in fo.readlines():
         words = line.split()
         p = np.append(p, np.array(
@@ -27,7 +28,7 @@ def find_min_y(lb, rb):
     min_id = 0
     min_y = np.Inf
     for i in range(lb, rb+1):
-        if(pointSet[i]['y'] < min_y):
+        if(pointSet[i]['y'] <= min_y):
             min_id = i
             min_y = pointSet[i]['y']
     print("min_id for lb:{}, rb:{} is {}".format(lb, rb, min_id))
@@ -116,7 +117,7 @@ def find_candidate_id(lb, rb, LR_left_id, LR_right_id, side) -> int:
     side_id = LR_left_id if side == 1 else LR_right_id  # 确认在LR边上与候选点相连的点
     for point_id in range(lb, rb+1):
         # 遍历合格的候选点
-        if edge[side_id][point_id] == side and side_id != point_id:
+        if edge[side_id][point_id] > 0 and point_id >= lb and point_id <= rb and side_id != point_id:
             cx = pointSet[point_id]['x']
             cy = pointSet[point_id]['y']
             candidateVector = np.array([cx - pointSet[side_id]['x'],
@@ -139,15 +140,18 @@ def find_candidate_id(lb, rb, LR_left_id, LR_right_id, side) -> int:
         print("Candidate for lb:{} rb:{} is {}".format(
             lb, rb, candidateArray[0]['id']))
         return candidateArray[0]['id']
+    elif len(candidateArray) == 0:
+        print("No candidate in lb:{} rb:{}".format(lb, rb))
+        return 0
 
-    for i in range(0, len(candidateArray)):
+    for i in range(0, len(candidateArray)-1):
         candidate = np.array(
             (candidateArray[i]['x'], candidateArray[i]['y']), dtype=Point)
         NextCandidate = np.array(
-            (candidateArray[i-1]['x'], candidateArray[i-1]['y']), dtype=Point)
+            (candidateArray[i+1]['x'], candidateArray[i+1]['y']), dtype=Point)
 
         print("Testing {} , the next candidate is {}".format(
-            candidateArray[i]['id'], candidateArray[i-1]['id']))
+            candidateArray[i]['id'], candidateArray[i+1]['id']))
 
         if(isOutCircle(p1=LR_left, p2=LR_right, p3=candidate, target=NextCandidate)):
             print("Candidate for lb:{} rb:{} is {}".format(
@@ -159,13 +163,16 @@ def find_candidate_id(lb, rb, LR_left_id, LR_right_id, side) -> int:
                 edge[side_id][candidateArray[i]['id']] = 0
             print("Delete edge between {} {}".format(
                 side_id, candidateArray[i]['id']))
-    print("No candidate in lb:{} rb:{}".format(lb, rb))
-    return 0
+    
+
+    print("Candidate for lb:{} rb:{} is {}".format(
+            lb, rb, candidateArray[len(candidateArray)-1]['id']))
+    return candidateArray[len(candidateArray)-1]['id']
 
 
 def merge(lb, rb, side):
     global pointSet
-    global edgecls
+    global edge
 
     print("merging {} and {}".format(lb, rb))
     middle = math.floor((lb + rb) / 2)
@@ -219,13 +226,19 @@ def merge(lb, rb, side):
 
 if __name__ == '__main__':
     pointSet = init(pointSet)
+    #pointSet = visualize.init()
     print(pointSet)
+    visualize.draw_point(pointSet)
     merge(1, 10, side=0)
     for i in range(1, 11):
         for j in range(1, i):
             if edge[i][j] == 1:
                 print("{}---{}:LL".format(i, j))
+                visualize.connect(pointSet[i], pointSet[j])
             elif edge[i][j] == 2:
                 print("{}---{}:RR".format(i, j))
+                visualize.connect(pointSet[i], pointSet[j])
             elif edge[i][j] == 3:
                 print("{}---{}:LR".format(i, j))
+                visualize.connect(pointSet[i], pointSet[j])
+    visualize.draw()
