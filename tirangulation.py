@@ -1,20 +1,21 @@
-from matplotlib.pyplot import connect
-from numpy.lib.function_base import angle
 import visualize
 import numpy as np
 import math
+
+CNT = 15
+MAXRANGE = 100
+
 Point = np.dtype([('x', 'i4'), ('y', 'i4'), ('id', 'i4')])
 CandidateState = np.dtype(
     [('x', 'i4'), ('y', 'i4'), ('angle', 'float64'), ('id', 'i4')])
 
-edge = np.zeros([11, 11], dtype='i2')
+edge = np.zeros([CNT, CNT], dtype='i2')
 pointSet = np.zeros(0, dtype=Point)
 
 
 def init(p):
-    p = np.append(p, np.array(
-        (0, 0, 0), dtype=Point))
-    fo = open("input2.in", "r")
+    p = np.empty(0, dtype=Point)
+    fo = open("input.in", "r")
 
     for line in fo.readlines():
         words = line.split()
@@ -60,22 +61,6 @@ def find_base_LR(lb, rb):
 
     return [Lmin['id'], Rmin['id']]
     pass
-
-    # def calPara(point1_id, point2_id):
-    #     A = pointSet[point2_id]['y']-pointSet[point1_id]['y']  # Y2 - Y1
-    #     B = pointSet[point1_id]['x']-pointSet[point2_id]['x']  # X1 - X2
-    #     C = pointSet[point2_id]['x'] * pointSet[point1_id]['y'] - \
-    #         pointSet[point1_id]['x'] * pointSet[point2_id]['y']  # X2*Y1 - X1*Y2
-    #     return [A, B, C]
-
-    # def isAboveLine(point_id, paraList):
-    #     global pointSet
-    #     x = pointSet[point_id]['x']
-    #     y = pointSet[point_id]['y']
-    #     if(paraList[1] == 0):
-    #         return -paraList[0]*x-paraList[2] < 0
-    #     else:
-    #         return (y > (-paraList[0]*x-paraList[2])/paraList[1])
 
 
 def dis(vector1, vector2):
@@ -167,7 +152,7 @@ def find_candidate_id(lb, rb, LR_left_id, LR_right_id, side) -> int:
         return candArray[0]['id']
     elif len(candArray) == 0:
         print("No candidate in lb:{} rb:{}".format(lb, rb))
-        return 0
+        return -1
 
     for i in range(0, len(candArray)-1):
         cand = np.array(
@@ -229,7 +214,7 @@ def merge(lb, rb, side):
             print("left c is {}. right c is {}".format(
                 left_cand_id, right_cand_id))
 
-            if(left_cand_id != 0 and right_cand_id != 0):  # 两边都有候选点，选取一个
+            if(left_cand_id != -1 and right_cand_id != -1):  # 两边都有候选点，选取一个
                 if isOutCircle(pointSet[LR_left_id], pointSet[LR_right_id],
                                pointSet[left_cand_id], pointSet[right_cand_id]):
                     # 右候选点不在（左候选点，LR边的两点）组成的三角形的外接圆内
@@ -239,10 +224,10 @@ def merge(lb, rb, side):
                     LR_right_id = right_cand_id
                     print("RIGHT candidate wins")
             else:   # 只有一边有候选点
-                if(left_cand_id != 0):
+                if(left_cand_id != -1):
                     LR_left_id = left_cand_id
                     print("LEFT candidate wins")
-                elif(right_cand_id != 0):
+                elif(right_cand_id != -1):
                     LR_right_id = right_cand_id
                     print("RIGHT candidate wins")
                 else:
@@ -251,12 +236,12 @@ def merge(lb, rb, side):
 
 if __name__ == '__main__':
     #pointSet = init(pointSet)
-    pointSet = visualize.init()
+    pointSet = visualize.init(cnt=CNT, maxRange=MAXRANGE)
     print(pointSet)
     visualize.draw_point(pointSet)
-    merge(1, 10, side=0)
-    for i in range(1, 11):
-        for j in range(1, i):
+    merge(0, CNT-1, side=0)
+    for i in range(0, CNT):
+        for j in range(0, i):
             if edge[i][j] == 1:
                 print("{}---{}:LL".format(i, j))
                 visualize.connect(pointSet[i], pointSet[j])

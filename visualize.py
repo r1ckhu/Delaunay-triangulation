@@ -8,17 +8,14 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 
 
-def init():
+def init(cnt,maxRange):
     global fig
     global ax
-    pointSet = np.zeros(0, dtype=Point)
-    #pointSet = np.empty(0, dtype=Point)
-    pointSet = np.append(pointSet, np.array(
-        (0, 0, 0), dtype=Point))
+    pointSet = np.empty(0, dtype=Point)
     i = 1
-    while(i <= 10):
-        x = random.randint(0, 5)
-        y = random.randint(0, 5)
+    while(i <= cnt):
+        x = random.randint(0, maxRange)
+        y = random.randint(0, maxRange)
         newPoint = np.array((x, y, 0), dtype=Point)
         repeat_ = False
         for point in pointSet:
