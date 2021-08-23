@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 from numpy.core.fromnumeric import repeat
-Point = np.dtype([('x', 'i4'), ('y', 'i4')])
+Point = np.dtype([('x', 'i4'), ('y', 'i4'), ('id', 'i4')])
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
@@ -14,17 +14,17 @@ def init():
     pointSet = np.zeros(0, dtype=Point)
     #pointSet = np.empty(0, dtype=Point)
     pointSet = np.append(pointSet, np.array(
-        (0, 0), dtype=Point))
+        (0, 0, 0), dtype=Point))
     i = 1
     while(i <= 10):
         x = random.randint(0, 5)
         y = random.randint(0, 5)
-        newPoint = np.array((x, y), dtype=Point)
+        newPoint = np.array((x, y, 0), dtype=Point)
         repeat_ = False
         for point in pointSet:
             if point['x'] == x \
-                and point['y']== y:
-                repeat_=True
+                    and point['y'] == y:
+                repeat_ = True
         if not repeat_:
             pointSet = np.append(pointSet, newPoint)
             i += 1
@@ -33,7 +33,10 @@ def init():
     array_y = pointSet['y']
     ax.plot(array_x, array_y, "o")
     pointSet.sort(kind='quicksort', order=['x', 'y'])
-    print(pointSet)
+
+    for i, point in enumerate(pointSet):
+        point['id'] = i
+    #print(pointSet)
     return pointSet
 
 
@@ -43,12 +46,12 @@ def connect(point1, point2):
     ArrY = [point1['y'], point2['y']]
     ax.plot(ArrX, ArrY)
 
+
 def draw_point(pointSet):
     global ax
     ArrX = pointSet['x']
     ArrY = pointSet['y']
-    ax.plot(ArrX,ArrY,"o")
-
+    ax.plot(ArrX, ArrY, "o")
 
 
 def draw():
