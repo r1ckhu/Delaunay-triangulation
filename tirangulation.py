@@ -159,7 +159,7 @@ def find_candidate_id(lb, rb, LR_left_id, LR_right_id, side) -> int:
         cand = np.array(
             (candArray[i]['x'], candArray[i]['y'], candArray[i]['id']), dtype=Point)
         Nextcand = np.array(
-            (candArray[i+1]['x'], candArray[i+1]['y'], candArray[i]['id']), dtype=Point)
+            (candArray[i+1]['x'], candArray[i+1]['y'], candArray[i+1]['id']), dtype=Point)
 
         print("Testing {} , the next candidate is {}".format(
             candArray[i]['id'], candArray[i+1]['id']))
