@@ -6,7 +6,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 
 
-def init(cnt,maxRange):
+def init(cnt,maxRange) -> np.ndarray:
     global fig
     global ax
     pointSet = np.empty(0, dtype=Point)

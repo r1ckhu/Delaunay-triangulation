@@ -13,9 +13,9 @@ edge = np.zeros([CNT, CNT], dtype='i2')
 pointSet = np.zeros(0, dtype=Point)
 
 
-def init(p):
+def init(p) -> np.ndarray:
     p = np.empty(0, dtype=Point)
-    fo = open("input2.in", "r")
+    fo = open("input.in", "r")
 
     for line in fo.readlines():
         words = line.split()
@@ -29,7 +29,7 @@ def init(p):
     return p
 
 
-def find_base_LR(lb, rb):
+def find_base_LR(lb, rb) -> list:
 
     middle = math.floor((lb + rb) / 2)
     L_points = pointSet.copy()[lb:middle+1]
@@ -62,11 +62,11 @@ def find_base_LR(lb, rb):
     return [Lmin['id'], Rmin['id']]
 
 
-def dis(vector1, vector2):
+def dis(vector1, vector2) -> np.float64:
     return np.sqrt(np.sum(np.square(vector1-vector2)))
 
 
-def calAngle(v1, v2):
+def calAngle(v1, v2) -> np.float64:
     # 计算向量v1旋转到向量v2的夹角，返回值范围(-180,180]，保留两位小数，正值为逆时针，负值为顺时针
     norm = np.linalg.norm(v1) * np.linalg.norm(v2)
     rho = np.rad2deg(np.arcsin(np.cross(v1, v2)/norm))
@@ -235,7 +235,8 @@ def merge(lb, rb, side):
                     break
 
 
-if __name__ == '__main__':
+def main():
+    global pointSet
     pointSet = init(pointSet)
     #pointSet = visualize.init(cnt=CNT, maxRange=MAXRANGE)
     print(pointSet)
@@ -253,3 +254,7 @@ if __name__ == '__main__':
                 print("{}---{}:LR".format(i, j))
                 visualize.connect(pointSet[i], pointSet[j])
     visualize.draw()
+
+if __name__ == '__main__':
+    main()
+
