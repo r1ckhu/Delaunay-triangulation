@@ -62,8 +62,8 @@ def find_base_LR(lb, rb) -> list:
     return [Lmin['id'], Rmin['id']]
 
 
-def calDis(array1, array2) -> np.float64:
-    return np.sqrt(np.sum(np.square(array1-array2)))
+def dis(vector1, vector2) -> np.float64:
+    return np.sqrt(np.sum(np.square(vector1-vector2)))
 
 
 def calAngle(v1, v2) -> np.float64:
@@ -79,42 +79,21 @@ def calAngle(v1, v2) -> np.float64:
 
 
 def isOutCircle(p1, p2, p3, target) -> bool:
-    x0 = np.linalg.det(np.array([
-        [p1['x']**2+p1['y']**2, p1['y'], 1],
-        [p2['x']**2+p2['y']**2, p2['y'], 1],
-        [p3['x']**2+p3['y']**2, p3['y'], 1], ]
-    )) / (2*np.linalg.det(np.array([
-        [p1['x'], p1['y'], 1],
-        [p2['x'], p2['y'], 1],
-        [p3['x'], p3['y'], 1]]
-    )))
-    y0 = np.linalg.det(np.array([
-        [p1['x'], p1['x']**2+p1['y']**2, 1],
-        [p2['x'], p2['x']**2+p2['y']**2, 1],
-        [p3['x'], p3['x']**2+p3['y']**2, 1], ]
-    )) / (2*np.linalg.det(np.array([
-        [p1['x'], p1['y'], 1],
-        [p2['x'], p2['y'], 1],
-        [p3['x'], p3['y'], 1]]
-    )))
-
-    vp1 = np.array([p1['x'], p1['y']])
-    vp2 = np.array([p2['x'], p2['y']])
-    vp3 = np.array([p3['x'], p3['y']])
-    vpt = np.array([target['x'], target['y']])
-    vp0 = np.array([x0, y0])
-
-    a = calDis(vp1, vp2)
-    b = calDis(vp2, vp3)
-    c = calDis(vp3, vp1)
-    p = (a+b+c) / 2
-    R = round((a*b*c) / (4 * np.sqrt(p*(p-a)*(p-b)*(p-c))), 3)
-
-    return (round(calDis(vpt, vp0), 3) >= R)
+    pointlist = np.array([p1, p2, p3], dtype=Point)
+    pointlist = np.sort(pointlist, kind='quicksort', order='id')
+    #pointlist = pointlist[::-1]
+    pointlist = np.append(pointlist,target)
+    v1 = pointlist['x']
+    v2 = pointlist['y']
+    v3 = np.square(pointlist['x'])+np.square(pointlist['y'])
+    v4 = np.array([1, 1, 1, 1])
+    result = np.array([v1, v2, v3, v4])
+    result = result.T
+    value = round(np.linalg.det(result),2)
+    return value <= 0
 
 
 def find_candidate_id(lb, rb, LR_left_id, LR_right_id, side) -> int:
-    # side=1是为左边，side=2时为右边
     global pointSet
     global edge
     LR_left = pointSet[LR_left_id]
@@ -181,7 +160,7 @@ def find_candidate_id(lb, rb, LR_left_id, LR_right_id, side) -> int:
     return candArray[len(candArray)-1]['id']
 
 
-def merge(lb, rb):
+def merge(lb, rb, side):
     global pointSet
     global edge
 
@@ -190,13 +169,13 @@ def merge(lb, rb):
     if(rb - lb + 1 <= 3):  # 点数少于3，直接相连
         for i in range(lb, rb+1):
             for j in range(lb, rb+1):
-                edge[i][j] = 1
+                edge[i][j] = side
                 print("Create edge between {} {}".format(i, j))
         print("Less than three. Complete!")
         return
     else:
-        merge(lb, middle)
-        merge(middle+1, rb)
+        merge(lb, middle, side=1)
+        merge(middle+1, rb, side=2)
         print("BIGGG merging {} and {}".format(lb, rb))
         # 左右子树合并
         LR_pointId_list = find_base_LR(lb, rb)
@@ -216,22 +195,22 @@ def merge(lb, rb):
             print("left c is {}. right c is {}".format(
                 left_cand_id, right_cand_id))
 
-            if(left_cand_id != -1 and right_cand_id != -1):  # 两边都有候选点，此时需要选取一个满足条件的
+            if(left_cand_id != -1 and right_cand_id != -1):  # 两边都有候选点，选取一个
                 if isOutCircle(pointSet[LR_left_id], pointSet[LR_right_id],
                                pointSet[left_cand_id], pointSet[right_cand_id]):
                     # 右候选点不在（左候选点，LR边的两点）组成的三角形的外接圆内
                     LR_left_id = left_cand_id
-                    print("LEFT candidate satisfys")
+                    print("LEFT candidate wins")
                 else:   # 右候选点不满足，选取左候选点
                     LR_right_id = right_cand_id
-                    print("RIGHT candidate satisfys")
+                    print("RIGHT candidate wins")
             else:   # 只有一边有候选点
                 if(left_cand_id != -1):
                     LR_left_id = left_cand_id
-                    print("LEFT candidate satisfys")
+                    print("LEFT candidate wins")
                 elif(right_cand_id != -1):
                     LR_right_id = right_cand_id
-                    print("RIGHT candidate satisfys")
+                    print("RIGHT candidate wins")
                 else:
                     break
 
@@ -241,15 +220,21 @@ def main():
     pointSet = init(pointSet)
     #pointSet = visualize.init(cnt=CNT, maxRange=MAXRANGE)
     print(pointSet)
-    visualize.draw_points_in(pointSet)
-    merge(0, CNT-1)
+    visualize.draw_point(pointSet)
+    merge(0, 4, side=0)
     for i in range(0, CNT):
         for j in range(0, i):
-            if edge[i][j] > 0 :
-                print("{}---{}".format(i, j))
-                visualize.draw_line_between(pointSet[i], pointSet[j])
-    visualize.drawfig()
+            if edge[i][j] == 1:
+                print("{}---{}:LL".format(i, j))
+                visualize.connect(pointSet[i], pointSet[j])
+            elif edge[i][j] == 2:
+                print("{}---{}:RR".format(i, j))
+                visualize.connect(pointSet[i], pointSet[j])
+            elif edge[i][j] == 3:
+                print("{}---{}:LR".format(i, j))
+                visualize.connect(pointSet[i], pointSet[j])
+    visualize.draw()
+
 
 if __name__ == '__main__':
     main()
-

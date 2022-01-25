@@ -12,4 +12,5 @@ def calAngle(v1,v2):
 
 v1 = np.array([0,1])
 v2 = np.array([0,-1])
-print(calAngle(v1,v2))
+angle = calAngle(v1,v2)
+print(type(angle))
